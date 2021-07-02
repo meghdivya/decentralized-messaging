@@ -1,18 +1,25 @@
 import threading
 import socket
 import constant
+from datetime import datetime
+
 
 class ClientMetadata:
-    def __init__(self, ip, port, identity):
-        self.ip = ip
-        self.port = port
-        self.identity = identity
+    def __init__(self, address, alias):
+        self.address = address
+        self.alias = alias
+        self.date = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+
+    def __str__(self):
+        return 'name={self.alias}, network={self.address}, on {self.date}'.format(self=self)
+
 
 
 """
 This handles all client connections and broadcast the client messages
 to all other clients
 """
+
 class ChatServer:
     def __init__(self, ip, port):
         self.host = ip
@@ -43,10 +50,11 @@ class ChatServer:
                 self.clients.remove(client)
                 client.close()
                 alias = self.aliases[index]
-                self.broadcast(f'{alias} has left the chat room!'.encode('utf-8'))
+
+                self.broadcast(
+                    f'{alias} has left the chat room!'.encode('utf-8'))
                 self.aliases.remove(alias)
                 break
-
 
     def receive(self):
         while True:
@@ -60,12 +68,20 @@ class ChatServer:
             self.aliases.append(alias)
             self.clients.append(client)
             print(f'The alias of this client is {alias}'.encode('utf-8'))
-            self.broadcast(f'{alias} has connected to the chat room'.encode('utf-8'))
+
+            metadata = ClientMetadata(str(address), alias)
+            self.broadcast(
+                f'{metadata} has connected to the chat room'.encode('utf-8'))
+
             client.send('you are now connected!'.encode('utf-8'))
-            thread = threading.Thread(target=self.handle_client, args=(client,))
+            thread = threading.Thread(
+                target=self.handle_client, args=(client,))
+
             thread.start()
 
 
 if __name__ == "__main__":
-    testChatServer = ChatServer(constant.CHAT_SERVER_IP, constant.CHAT_SERVER_PORT)
+    testChatServer = ChatServer(
+        constant.CHAT_SERVER_IP, constant.CHAT_SERVER_PORT)
+
     testChatServer.receive()
