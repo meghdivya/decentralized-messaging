@@ -2,15 +2,6 @@ import threading
 import socket
 import constant
 
-#host = '127.0.0.1'
-#port = 59000
-#server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-#server.bind((host, port))
-#server.listen()
-#clients = []
-#aliases = []
-#
-
 class ClientMetadata:
     def __init__(self, ip, port, identity):
         self.ip = ip
